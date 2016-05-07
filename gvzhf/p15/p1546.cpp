@@ -33,7 +33,7 @@ bool cmp(string a, string b) {
     }
     if (ai != a.length() || bi != b.length()) return ai == a.length();
     for (int i = 0; i < min(a.length(), b.length()); i++) {
-        if (a[i] != b[i]) return a[i] == '0'; //ToDo
+        if (a[i] != b[i]) return a[i] == '0';
     }
     if (b.length() > a.length() && b[a.length()] == '0'){
         return false;
