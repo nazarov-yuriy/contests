@@ -3,7 +3,8 @@
 using namespace std;
 
 #define N 470
-int main() {
+
+int main_emulation() {
     int n;
     cin >> n;
     getchar();
@@ -28,6 +29,25 @@ int main() {
         }
         res += inc;
     } while (inc);
+    cout << res;
+    return 0;
+}
+
+int main() {
+    int n;
+    cin >> n;
+    getchar();
+    int cnt_r = 0;
+    long long int res = 0;
+    for (int i = 0; i < n; i++) {
+        char c;
+        while ('<' > (c = (char) getchar())) { }
+        if ('>' == c) {
+            cnt_r++;
+        } else {
+            res += cnt_r;
+        }
+    }
     cout << res;
     return 0;
 }
