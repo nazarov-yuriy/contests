@@ -3,7 +3,7 @@
 
 using namespace std;
 
-#define SZ 100002 //100002
+#define SZ 100002
 int p[SZ] = {};
 int del[SZ] = {1, 1};
 int dep[SZ] = {1, 1};
@@ -84,20 +84,20 @@ int main() {
         cin >> cmd >> a;
         if (cmd == 2) {
             int ca = a;
-            for(int j = 0; j < STEP; j++){
-                if(ca == 1) break;
-                if(0==(depth(ca)%STEP)){
-                    for(auto it = on_depth[depth(ca)].begin(); it != on_depth[depth(ca)].end(); ++it){//int k = 2; k <= n; k++){
+            for (int j = 0; j < STEP; j++) {
+                if (ca == 1) break;
+                if (0 == (depth(ca) % STEP)) {
+                    for (auto it = on_depth[depth(ca)].begin(); it != on_depth[depth(ca)].end(); ++it) {//int k = 2; k <= n; k++){
                         int k = *it;
-                        if(cache_p[k] == ca) {
+                        if (cache_p[k] == ca) {
                             int cca = k;
-                            while(cca != ca && cca != a && cca != 1){cca = p[cca];};
-                            if(cca == a) cache_d[k]--;
+                            while (cca != ca && cca != a && cca != 1) { cca = p[cca]; };
+                            if (cca == a) cache_d[k]--;
                         }
                     }
                     break;
                 }
-                ca=p[ca];
+                ca = p[ca];
             }
             del[a] = 0;
         } else {
