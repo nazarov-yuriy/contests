@@ -1,56 +1,64 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
-#include <map>
+#include <set>
 
 using namespace std;
 
-struct city {
-    bool visited;
-    int dist;
-    map<int, int> to;
+struct edge {
+    int to, length;
 };
 
-bool cmp(city *a, city *b) {
-    return a->dist > b->dist;
+int dijkstra(const vector<vector<edge> > &graph, int source0, int source1, int target0, int target1) {
+    int to_visited = -1;
+    vector<int> min_distance(graph.size(), 2000000000);
+    min_distance[source0] = 0;
+    min_distance[source1] = 0;
+    set<pair<int, int> > active_vertices;
+    active_vertices.insert({0, source0});
+    active_vertices.insert({0, source1});
+
+    while (!active_vertices.empty()) {
+        int where = active_vertices.begin()->second;
+        if (where == target0 || where == target1) {
+            if (to_visited >= 0)
+                return min(min_distance[where], min_distance[to_visited]);
+            else
+                to_visited = where;
+        }
+        active_vertices.erase(active_vertices.begin());
+        for (auto edge : graph[where])
+            if (min_distance[edge.to] > min_distance[where] + edge.length) {
+                active_vertices.erase({min_distance[edge.to], edge.to});
+                min_distance[edge.to] = min_distance[where] + edge.length;
+                active_vertices.insert({min_distance[edge.to], edge.to});
+            }
+    }
+    return 2000000000;
 }
 
 int main() {
+    ios_base::sync_with_stdio(0);
     int n, m;
     cin >> n >> m;
-    city c[2 * n + 2];
-    for (int i = 1; i <= n; i++) {
-        c[2 * i] = c[2 * i + 1] = {false, 2000000000};
-        c[2 * i].to[2 * i + 1] = 1;
-        c[2 * i + 1].to[2 * i] = 1;
-    }
+    vector<vector<edge>> graph;
+    for (int i = 0; i < 2 * n; i++) graph.push_back({});
     for (int i = 0; i < m; i++) {
         int f, t;
         cin >> f >> t;
-        c[2 * f + 1].to[2 * t + 1] = 0;
-        c[2 * t + 0].to[2 * f + 0] = 0;
+        f--;
+        t--;
+        if (graph[2 * f + 0].empty()) graph[2 * f + 0].push_back({2 * f + 1, 1});
+        if (graph[2 * f + 1].empty()) graph[2 * f + 1].push_back({2 * f + 0, 1});
+        if (graph[2 * t + 0].empty()) graph[2 * t + 0].push_back({2 * t + 1, 1});
+        if (graph[2 * t + 1].empty()) graph[2 * t + 1].push_back({2 * t + 0, 1});
+        graph[2 * f + 1].push_back({2 * t + 1, 0});
+        graph[2 * t + 0].push_back({2 * f + 0, 0});
     }
     int f, t;
     cin >> f >> t;
-    c[2 * f].dist = c[2 * f + 1].dist = 0;
-    vector<city *> cl;
-    for (int i = 2; i <= 2 * n + 1; i++) cl.push_back(&c[i]);
-    while (true){//!cl.empty()) {
-        city *current = NULL;// = cl.front();
-        int min_d = 2000000001;
-        for(auto it = cl.begin(); it != cl.end(); ++it){if(!(*it)->visited && (*it)->dist < min_d){current = *it; min_d = (*it)->dist;}}
-        if (current == NULL) break;
-        //pop_heap(cl.begin(), cl.end());
-        //cl.pop_back();
-        for (auto it = current->to.begin(); it != current->to.end(); ++it) {
-            int dist = current->dist + it->second;
-            if (dist < c[it->first].dist) {
-                c[it->first].dist = dist;
-                //make_heap(cl.begin(), cl.end(), cmp);
-            }
-        }
-        current->visited = true;
-    }
-    cout << min(c[2 * t].dist, c[2 * t + 1].dist);
+    f--;
+    t--;
+    cout << dijkstra(graph, 2 * f + 0, 2 * f + 1, 2 * t + 0, 2 * t + 1);
     return 0;
 }
