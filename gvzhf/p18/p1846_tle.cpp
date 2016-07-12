@@ -1,6 +1,7 @@
 #include <iostream>
 #include <map>
 #include <set>
+#include <cmath>
 
 using namespace std;
 
@@ -177,63 +178,64 @@ int primes[] = {
         31267, 31271, 31277, 31307, 31319, 31321, 31327, 31333, 31337, 31357, 31379, 31387, 31391, 31393, 31397, 31469, 31477, 31481, 31489, 31511,
         31513, 31517, 31531, 31541, 31543, 31547, 31567, 31573, 31583, 31601, 31607, 31627};
 
-map<int, set<int>> cache;
+map<int, map<int,int>> cache;
 
-set<int> divisors(int v) {
+map<int,int> divisors(int v) {
     if (cache.count(v)) return cache[v];
     int orig = v;
-    set<int> res;
+    map<int,int> res;
     for (int i = 0; i < sizeof(primes) / sizeof(*primes); i++) {
         if (0 == v % primes[i]) {
-            int d = 1;
             while (0 == v % primes[i]) {
                 v /= primes[i];
-                d *= primes[i];
-                res.insert(d);
+                res[primes[i]]++;
             }
         }
         if (1 == v) break;
     }
     if (v > 1) {
-        res.insert(v);
+        res[v]++;
     }
     cache[orig] = res;
     return res;
 }
 
-int add(map<int, int> &curr, set<int> &neww, int count) {
+int add(map<int, map<int, int>> &curr, map<int, int> &neww, int count) {
     int res = 1;
-    while (neww.size()) {
-        int pr = *neww.begin();
-        long long int pr_pow = pr;
-        int last = 1;
-        while (pr_pow <= 1000000000 && neww.count(pr_pow)) {
-            neww.erase(pr_pow);
-            curr[pr_pow]++;
-            if (curr[pr_pow] == count) last = pr_pow;
-            pr_pow *= pr;
+    for (auto it = curr.begin(); it != curr.end(); ++it) {
+        if (!neww.count(it->first)) it->second[0]++;
+    }
+    for (auto it = neww.begin(); it != neww.end(); ++it) {
+        if(count>1 && curr[it->first].empty()) curr[it->first][0] = count - 1;
+        curr[it->first][it->second]++;
+    }
+    for (auto it = curr.begin(); it != curr.end();) {
+        while(it->second.begin()->second == 0) it->second.erase(it->second.begin());
+        if(it->second.empty())
+            it = curr.erase(it);
+        else {
+            res *= pow(it->first, it->second.begin()->first);
+            ++it;
         }
-        res *= last;
     }
     return res;
 }
 
-int del(map<int, int> &curr, set<int> &neww, int count) {
-    for (auto it = neww.begin(); it != neww.end(); ++it) {
-        curr[*it]--;
-    }
-    if (count == 0) return 1;
+int del(map<int, map<int, int>> &curr, map<int, int> &neww, int count) {
     int res = 1;
-    set<int> visited;
     for (auto it = curr.begin(); it != curr.end(); ++it) {
-        if (it->second == count && !visited.count(it->first)) {
-            long long int pr_pow = it->first;
-            while (pr_pow <= 1000000000 && curr[pr_pow] == count) {
-                visited.insert(pr_pow);
-                pr_pow *= it->first;
-            }
-            pr_pow /= it->first;
-            res *= pr_pow;
+        if (!neww.count(it->first)) it->second[0]--;
+    }
+    for (auto it = neww.begin(); it != neww.end(); ++it) {
+        curr[it->first][it->second]--;
+    }
+    for (auto it = curr.begin(); it != curr.end();) {
+        while(it->second.begin()->second == 0) it->second.erase(it->second.begin());
+        if(it->second.empty())
+            it = curr.erase(it);
+        else {
+            res *= pow(it->first, it->second.begin()->first);
+            ++it;
         }
     }
     return res;
@@ -243,7 +245,7 @@ int main() {
     ios_base::sync_with_stdio(0);
     int n;
     cin >> n;
-    map<int, int> counts;
+    map<int, map<int,int>> counts;
     int count = 0;
     map<int, int> numbers_count;
     int last = 0;
@@ -258,7 +260,7 @@ int main() {
             } else {
                 numbers_count[t]++;
                 count++;
-                set<int> d = divisors(t);
+                map<int,int> d = divisors(t);
                 cout << (last = add(counts, d, count)) << endl;
             }
         } else {
@@ -267,7 +269,7 @@ int main() {
                 cout << last << endl;
             } else {
                 numbers_count[t]--;
-                set<int> d = divisors(t);
+                map<int,int> d = divisors(t);
                 count--;
                 cout << (last = del(counts, d, count)) << endl;
             }
