@@ -221,7 +221,7 @@ class AVLTree:
         return left_count + node.left_count, right_count + node.right_count
 
 class Solution:
-    def createSortedArray(self, instructions: List[int]) -> int:
+    def createSortedArrayAVL(self, instructions: List[int]) -> int:
         tree = AVLTree()
         c = Counter()
         res = 0
@@ -231,6 +231,36 @@ class Solution:
             l, r = tree.get_left_right_count(num)
             res += min(l, r)
         return res % (10**9 + 7)
+
+    def createSortedArray(self, instructions: List[int]) -> int:
+        if len(instructions) == 0:
+            return 0
+        max_inst = max(instructions)
+        fenwick_size = max_inst + 1
+        fenwick = [0] * fenwick_size
+        def inc_fenwick(fenwick, pos, size):
+            bit = 1
+            while pos < size:
+                if pos & bit:
+                    fenwick[pos] += 1
+                    pos += bit
+                bit <<= 1
+        def get_fenwick(fenwick, pos, size):
+            res = 0
+            bit = 1
+            while pos:
+                if pos & bit:
+                    res += fenwick[pos]
+                    pos -= bit
+                bit <<= 1
+            return res
+        res = 0
+        for i, num in enumerate(instructions):
+            inc_fenwick(fenwick, num, fenwick_size)
+            l = get_fenwick(fenwick, num - 1, fenwick_size)
+            r = i + 1 - get_fenwick(fenwick, num, fenwick_size)
+            res += min(l, r)
+        return res % (10**9+7)
 
 
 class Test(unittest.TestCase):
