@@ -16,7 +16,7 @@ class Solution:
                     stack.append([pos, heights[pos]])
 
                 stack[-1][1] = min(stack[-1][1], heights[pos])
-                while len(stack) > 0 and stack[-1][1] >= stack[-2][1]:
+                while len(stack) > 1 and stack[-1][1] <= stack[-2][1]:
                     stack.pop()
                     stack[-1][1] = heights[pos]
                 left_borders.append(stack[-1][0])
